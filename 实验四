@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = ['simhei']
+plt.rcParams['axes.unicode_minus'] = False
+
+# 热扩散时间
+maxIter = 1500
+
+# 二维空腔的长和宽
+X = Y = 40
+area = 1
+
+# Boundary condition
+top = 400
+bottle = 300
+left = 300
+right = 300
+
+# 计算域内部所有节点的温度初值
+guess = 300
+
+# Thermal conductivity
+ratio = 0.0675
+
+# Set colour interpolation and colour map
+colorinterpolation = 50
+colourMap = plt.cm.jet #you can try: colourMap = plt.cm.coolwarm
+
+# Set meshgrid
+X, Y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
+
+# Set array size and set the interior value with guess
+T = np.empty((X, Y))
+T.fill(guess)
+
+# Set Boundary condition
+T[(Y-1):, :] = top
+T[:1, :] = bottle
+T[:, (X-1):] = right
+T[:, :1] = left
+
+# Iteration (We assume that the iteration is convergence in maxIter = 1500)
+flag = 0
+print("Please wait for a moment")
+for iteration in range(0, maxIter+1): # 时间层
+    for i in range(1, X-1, area): # X方向
+        for j in range(1, Y-1, area): # Y方向
+            T[i,j] = T[i,j] + ratio*((T[i+1,j]-2*T[i,j]+T[i-1,j])+ \
+                                     (T[i,j+1]-2*T[i,j]+T[i,j-1]))
+    # Data visualization
+    if (flag % 100 == 0):
+        fig = plt.figure(figsize=(6, 4))
+        # Configure the contour
+        plt.title("Contour of Temperature(第{}时刻)".format(iteration))
+        plt.contourf(X, Y, T, colorinterpolation, cmap=colourMap)
+
+        # Set Colorbar
+        plt.colorbar()
+
+        # Show the result in the plot window
+        plt.show()
+        flag = 0
+    flag = flag + 1
+
+print("Finished")
